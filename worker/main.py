@@ -24,14 +24,12 @@ def main():
             time.sleep(2)
 
     ch = conn.channel()
-    queue = "jobs"
+    queue = "send-mail"
 
     ch.queue_declare(queue=queue, durable=True)
 
     def callback(ch, method, properties, body):
-        time.sleep(5)
         data = json.loads(body)
-        print("Processing:", data)
 
         # DO WORK HERE
         send_mail(data["subject"], data["email"], data["body"])

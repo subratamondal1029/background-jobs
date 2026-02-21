@@ -33,7 +33,7 @@ def send(subject: str, to: str, content: str) -> bool:
         server.login(username, password)
         server.send_message(msg)
         server.quit()
-        print("Email sent successfully to Ethereal!")
+        print(f"Email sent successfully to {to}!")
         return True
     except Exception as e:
         print(f"Error: {e}")
