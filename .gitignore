@@ -65,4 +65,4 @@ Thumbs.db
 # Docker
 .docker/
 docker-compose.override.yml
-db/
+volumes/
