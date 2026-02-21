@@ -1,11 +1,13 @@
 services:
   rabbitmq:
+    container_name: background-rabbitmq
     image: rabbitmq:3-management
     ports:
       - "5672:5672"
       - "15672:15672"
 
   worker:
+    container_name: background-worker
     build:
       context: .
       dockerfile: ./worker/Dockerfile
