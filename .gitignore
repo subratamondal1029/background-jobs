@@ -1,0 +1,68 @@
+# Node.js
+node_modules/
+dist/
+lib-dist/
+node_modules
+.npm
+.eslintcache
+.stylelintcache
+.node_repl_history
+*.js.map
+*.tsbuildinfo
+
+# pnpm
+pnpm-lock.yaml
+pnpm-debug.log*
+.pnpm-store
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# Environments
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+.venv
+venv/
+ENV/
+env.bak/
+venv.bak/
+.vscode
+
+# Custom Playgrounds
+playground.ts
+playground.py
+**/playground.ts
+**/playground.py
+
+# OS Files
+.DS_Store
+Thumbs.db
+
+# Docker
+.docker/
+docker-compose.override.yml
+db/
