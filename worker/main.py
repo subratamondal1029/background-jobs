@@ -4,6 +4,8 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
+from send_mail import send as send_mail
+
 def _required_env(name: str) -> str:
     value = os.getenv(name)
     if not value:
@@ -11,7 +13,6 @@ def _required_env(name: str) -> str:
     return value
 
 def main():
-    print("hello world")
     while True:
         try:
             conn = pika.BlockingConnection(
@@ -28,12 +29,12 @@ def main():
     ch.queue_declare(queue=queue, durable=True)
 
     def callback(ch, method, properties, body):
-        print("Received message start processing")
         time.sleep(5)
         data = json.loads(body)
         print("Processing:", data)
 
         # DO WORK HERE
+        send_mail(data["subject"], data["email"], data["body"])
 
         ch.basic_ack(delivery_tag=method.delivery_tag)
 
