@@ -11,10 +11,8 @@ services:
       dockerfile: ./worker/Dockerfile
     env_file:
       - .env
+    environment:
+      - RABBITMQ_CN=rabbitmq
     depends_on:
       rabbitmq:
         condition: service_healthy
-    # dev mode only
-    volumes:
-      - ./worker:/app
-    command: python3 main.py
