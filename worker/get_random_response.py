@@ -10,6 +10,3 @@ def get_random_response():
         return result
     except (requests.RequestException, ValueError):
         raise
-    
-
-print(get_random_response())
