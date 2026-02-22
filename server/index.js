@@ -5,7 +5,12 @@ import express from "express";
 const app = express();
 
 let ch;
-const queue = "send-mail";
+const queue = process.env.MESSAGE_QUEUE;
+
+if (!queue) {
+  throw new Error("MESSAGE_QUEUE environment variable is not set");
+}
+
 const connectMQ = async () => {
   const conn = await amqp.connect(process.env.RABBITMQ_CN);
   ch = await conn.createConfirmChannel();
@@ -13,14 +18,22 @@ const connectMQ = async () => {
 };
 
 const addTOQueue = async (msg) => {
-  if (!ch || !queue) return;
+  if (!ch) {
+    console.error("channel not found");
+    return;
+  }
 
-  ch.sendToQueue(queue, Buffer.from(JSON.stringify(msg)), {
+  const ok = ch.sendToQueue(queue, Buffer.from(JSON.stringify(msg)), {
     persistent: true,
+    contentType: "application/json",
   });
 
+  if (!ok) {
+    await new Promise((res) => ch.once("error", res));
+  }
+
   await ch.waitForConfirms();
-  return `Sent message: ${msg.subject}`;
+  return "Message Sent";
 };
 
 app.use(express.json());
@@ -30,17 +43,18 @@ app.get("/", (req, res) => {
   res.json({ message: "Welcome to the mail sending service!" });
 });
 
-app.post("/send-mail", async (req, res) => {
+app.post("/send-message", async (req, res) => {
   try {
-    const { to, subject, body } = req.body;
-    const result = await addTOQueue({ email: to, subject, body });
+    // const { to, subject, body } = req.body;
+    const result = await addTOQueue({ test: "work" });
 
-    if (!result) return res.status(500).json({ error: "Failed to send mail" });
+    if (!result)
+      return res.status(500).json({ error: "Failed to send message" });
 
     res.json({ message: result });
   } catch (error) {
-    console.error("Error sending mail:", error);
-    res.status(500).json({ error: "Failed to send mail" });
+    console.error("Error sending message:", error);
+    res.status(500).json({ error: "Failed to send message" });
   }
 });
 
