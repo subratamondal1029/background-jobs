@@ -20,6 +20,9 @@ services:
       - .env
     environment:
       - RABBITMQ_CN=rabbitmq
+      - API_URL=http://host.docker.internal:5000
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     depends_on:
       rabbitmq:
         condition: service_healthy

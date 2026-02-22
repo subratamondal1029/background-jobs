@@ -1,8 +1,9 @@
 import requests
+from _getenv import get_env
 
 def get_random_response():
     try:
-        response = requests.get("http://localhost:5000/get-random")
+        response = requests.get(f"{get_env('API_URL')}/get-random")
         result = response.json()
         if "error" in result:
             raise ValueError(result['error'])
