@@ -29,7 +29,7 @@ const addTOQueue = async (msg) => {
   });
 
   if (!ok) {
-    await new Promise((res) => ch.once("error", res));
+    await new Promise((res) => ch.once("drain", res));
   }
 
   await ch.waitForConfirms();
@@ -45,8 +45,7 @@ app.get("/", (req, res) => {
 
 app.post("/send-message", async (req, res) => {
   try {
-    // const { to, subject, body } = req.body;
-    const result = await addTOQueue({ test: "work" });
+    const result = await addTOQueue(req.body);
 
     if (!result)
       return res.status(500).json({ error: "Failed to send message" });
