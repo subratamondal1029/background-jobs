@@ -16,20 +16,9 @@ if (process.env.NODE_ENV !== "production") {
   globalForPrisma.prisma = prisma;
 }
 
-const connectDB = async () => {
-  try {
-    await prisma.$connect();
-    await prisma.$queryRaw`SELECT 1`;
-    console.log("Connected to database");
-  } catch (error) {
-    console.error("Error connecting to database:", error);
-    throw error;
-  }
-};
-
 // Gracefull shutdown
 const shutdown = async () => {
-  console.log("Shutting down gracefully...");
+  console.log("Shutting down DB gracefully...");
   await prisma.$disconnect();
   process.exit(0);
 };
@@ -38,5 +27,5 @@ const shutdown = async () => {
 // process.on("SIGINT", shutdown);
 // process.on("SIGTERM", shutdown);
 
-export { connectDB, shutdown as shutdownDB };
+export { shutdown as shutdownDB };
 export default prisma;
