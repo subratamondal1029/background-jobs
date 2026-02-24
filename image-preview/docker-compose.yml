@@ -61,7 +61,7 @@ services:
     ports:
       - "3000:3000"
     env_file:
-      - .env.local  
+      - .env
     environment:
       - DB_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
       - RABBITMQ_CONN=amqp://${RABBITMQ_USER}:${RABBITMQ_PASS}@rabbitmq:5672/
@@ -95,7 +95,7 @@ services:
       dockerfile: Dockerfile
     container_name: image-preview-worker
     env_file:
-      - .env.local
+      - .env
     environment:
       - DB_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
       - RABBITMQ_CONN=amqp://${RABBITMQ_USER}:${RABBITMQ_PASS}@rabbitmq:5672/
