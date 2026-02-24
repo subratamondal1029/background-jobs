@@ -1,7 +1,7 @@
 import amqplib from "amqplib";
 import requiredEnv from "@/utils/requiredEnv.js";
 
-const RABBITMQ_URL = requiredEnv("RABBITMQ_URL");
+const RABBITMQ_URL = requiredEnv("RABBITMQ_CONN");
 const EXCHANGE_NAME = requiredEnv("EXCHANGE_NAME");
 const IMAGE_PROCESS_QUEUE = requiredEnv("IMAGE_PROCESS_QUEUE");
 
