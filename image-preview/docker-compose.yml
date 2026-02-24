@@ -63,8 +63,8 @@ services:
     env_file:
       - .env.local  
     environment:
-      - DB_URL=postgresql://admin:admin@postgres:5432/image_preview
-      - RABBITMQ_CONN=amqp://admin:admin@rabbitmq:5672/
+      - DB_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
+      - RABBITMQ_CONN=amqp://${RABBITMQ_USER}:${RABBITMQ_PASS}@rabbitmq:5672/
       - S3_ENDPOINT=http://minio:9000
     depends_on:
       postgres:
@@ -93,8 +93,8 @@ services:
     env_file:
       - .env.local
     environment:
-      - DB_URL=postgresql://admin:admin@postgres:5432/image_preview
-      - RABBITMQ_CONN=amqp://admin:admin@rabbitmq:5672/
+      - DB_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
+      - RABBITMQ_CONN=amqp://${RABBITMQ_USER}:${RABBITMQ_PASS}@rabbitmq:5672/
       - S3_ENDPOINT=http://minio:9000
     depends_on:
       postgres:
