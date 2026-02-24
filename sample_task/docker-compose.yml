@@ -1,0 +1,28 @@
+services:
+  rabbitmq:
+    container_name: background-rabbitmq
+    image: rabbitmq:3-management
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  worker:
+    container_name: background-worker
+    build:
+      context: .
+      dockerfile: ./worker/Dockerfile
+    env_file:
+      - .env
+    environment:
+      - RABBITMQ_CN=rabbitmq
+      - API_URL=http://host.docker.internal:5000
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
