@@ -41,9 +41,8 @@ This repository demonstrates how to build scalable background processing systems
 ## 🏗 Architecture
 
 ```text
-[ Node.js Producer ] ---> [ RabbitMQ / Redis ] ---> [ Python Worker ]
-         |                                               |
-         +------------------> [ minio / S3 ] <---+
+[ Node.js Producer ] ---> [ RabbitMQ ] ---> [ Python Worker ]
+         |+------------------> [ Storage Services ] <---+|
 ```
 
 ---
