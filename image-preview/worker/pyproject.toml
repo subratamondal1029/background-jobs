@@ -12,6 +12,4 @@ dependencies = [
 ]
 
 [dependency-groups]
-dev = [
-    "watchfiles>=1.1.1",
-]
+dev = []
