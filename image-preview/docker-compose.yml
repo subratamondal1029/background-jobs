@@ -1,25 +1,31 @@
 services:
+# Database The Main Source of truth
   postgres:
     image: postgres:18
     container_name: image-preview-db
     environment:
-      POSTGRES_USER: admin
-      POSTGRES_PASSWORD: admin
-      POSTGRES_DB: image_preview
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
     ports:
       - "5432:5432"
     volumes:
       - ./volumes/postgres:/var/lib/postgresql/
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
+# Message Broker service
   rabbitmq:
     image: rabbitmq:3-management
     container_name: image-preview-rabbitmq
     ports:
-      - "5672:5672"
       - "15672:15672"
     environment:
-      RABBITMQ_DEFAULT_USER: admin
-      RABBITMQ_DEFAULT_PASS: admin
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASS}
     volumes:
       - ./volumes/rabbitmq:/var/lib/rabbitmq
     healthcheck:
@@ -28,19 +34,25 @@ services:
       timeout: 5s
       retries: 5
 
+# Storage Service
   minio:
     image: minio/minio:latest
     container_name: image-preview-minio
     ports:
-      - "9000:9000"
       - "9001:9001"
     environment:
-      MINIO_ROOT_USER: admin
-      MINIO_ROOT_PASSWORD: admin
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
     command: server /data --console-address ":9001"
     volumes:
       - ./volumes/storage:/data
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
+# Node.js Application Server
   server:
     build:
       context: ./server
@@ -48,17 +60,50 @@ services:
     container_name: image-preview-server
     ports:
       - "3000:3000"
+    env_file:
+      - .env.local  
+    environment:
+      - DB_URL=postgresql://admin:admin@postgres:5432/image_preview
+      - RABBITMQ_CONN=amqp://admin:admin@rabbitmq:5672/
+      - S3_ENDPOINT=http://minio:9000
     depends_on:
-      - postgres
-      - rabbitmq
-      - minio
+      postgres:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+      minio:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget --quiet --tries=1 --spider http://localhost:3000/health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      # Dev config
+    volumes:
+      - ./server:/app
+      - /app/node_modules
+    command: sh -c "pnpm install && pnpm dev"
 
+# Python Worker process
   worker:
     build:
       context: ./worker
       dockerfile: Dockerfile
     container_name: image-preview-worker
+    env_file:
+      - .env.local
+    environment:
+      - DB_URL=postgresql://admin:admin@postgres:5432/image_preview
+      - RABBITMQ_CONN=amqp://admin:admin@rabbitmq:5672/
+      - S3_ENDPOINT=http://minio:9000
     depends_on:
-      - postgres
-      - rabbitmq
-      - minio
+      postgres:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+      minio:
+        condition: service_healthy
+    # Dev config
+    volumes:
+      - ./worker:/app
+    command: sh -c "uv sync && uv run watchfiles main.py"
