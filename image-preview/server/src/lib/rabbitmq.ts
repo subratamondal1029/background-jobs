@@ -43,6 +43,7 @@ const connectMQ = async () => {
     });
 
     await createQueue(IMAGE_PROCESS_QUEUE);
+    await channel.bindQueue(IMAGE_PROCESS_QUEUE, EXCHANGE_NAME, IMAGE_PROCESS_QUEUE);
   } catch (error) {
     console.error("Error connecting to RabbitMQ:", error);
     throw error;
