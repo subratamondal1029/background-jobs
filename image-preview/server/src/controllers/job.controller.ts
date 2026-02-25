@@ -44,7 +44,7 @@ const sendStatusUpdate = async (jobId: number, status: string) => {
   const response = {
     jobId,
     status: job.status,
-    previewUrl: `/api/v1/images/preview/${job.resourceId}`,
+    previewUrl: job.status === "SUCCESS" ? `/api/v1/images/preview/${job.resourceId}` : null,
   };
 
   sseService.sendData(jobId, response);
