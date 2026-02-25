@@ -6,6 +6,7 @@ import { publishToQueue } from "@/lib/rabbitmq";
 import type { Request, Response } from "express";
 import type { JobIdSchema } from "@/schema/jobSchema/id.schema.js";
 import ApiResponse from "@/utils/ApiResponse";
+import sseService from "@/services/sse.service";
 
 // outside of req, res cycle
 const addJob = async (imageId: string): Promise<number> => {
@@ -49,6 +50,44 @@ const getJobStatus = asyncHandler(async (req: Request, res: Response) => {
   res.json(new ApiResponse(job, 200, "Job status retrieved successfully"));
 });
 
+// sse job status
+const startSseJobStatusEvent = asyncHandler(async (req: Request, res: Response) => {
+  const { id } = req.params as unknown as JobIdSchema;
+
+  const job = await prisma.job.findUnique({
+    where: {
+      id,
+    },
+    select: {
+      id: true,
+      status: true,
+      completedAt: true,
+      createdAt: true,
+      updatedAt: true,
+    },
+  });
+
+  if (!job) {
+    throw new ApiError(404, "Job not found");
+  }
+
+  res.setHeader("Content-Type", "text/event-stream");
+  res.setHeader("Cache-Control", "no-cache");
+  res.setHeader("Connection", "keep-alive");
+
+  res.write(`data: ${JSON.stringify(job)}\n\n`);
+
+  if (job?.status === "SUCCESS") {
+    res.end();
+    return;
+  }
+
+  sseService.addInstance(job.id, res);
+  req.on("close", () => {
+    sseService.removeInstance(job.id);
+  });
+});
+
 // for admin/developer
 const getJob = asyncHandler(async (req: Request, res: Response) => {
   const { id } = req.params as unknown as JobIdSchema;
@@ -66,4 +105,4 @@ const getJob = asyncHandler(async (req: Request, res: Response) => {
   res.json(new ApiResponse(job, 200, "Job retrieved successfully"));
 });
 
-export { addJob, getJobStatus, getJob };
+export { addJob, getJobStatus, startSseJobStatusEvent, getJob };

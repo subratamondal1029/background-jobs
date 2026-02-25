@@ -1,5 +1,9 @@
 import { Router } from "express";
-import { getJob, getJobStatus } from "@/controllers/job.controller";
+import {
+  getJob,
+  getJobStatus,
+  startSseJobStatusEvent,
+} from "@/controllers/job.controller";
 import zodParser, { TargetEnum } from "@/middlewares/zodParser.middleware";
 import { jobIdSchema } from "@/schema/jobSchema/id.schema";
 
@@ -9,5 +13,6 @@ router.use(zodParser(jobIdSchema, TargetEnum.params));
 
 router.get("/:id", getJob);
 router.get("/status/:id", getJobStatus);
+router.get("/status/event/:id", startSseJobStatusEvent);
 
 export default router;
