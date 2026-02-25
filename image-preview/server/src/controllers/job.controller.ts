@@ -41,15 +41,25 @@ const sendStatusUpdate = async (jobId: number, status: string) => {
     return;
   }
 
-  const response = {
+  const response: {
+    jobId: number,
+    status: string,
+    previewUrl?: string
+    error?: string
+  } = {
     jobId,
     status: job.status,
-    previewUrl: job.status === "SUCCESS" ? `/api/v1/images/preview/${job.resourceId}` : null,
   };
+
+  if(job.status === "SUCCESS") {
+    response.previewUrl = `/api/v1/images/preview/${job.resourceId}`
+  }else if(job.status === "FAILED") {
+    response.error = "Something Went Wrong";
+  }
 
   sseService.sendData(jobId, response);
 
-  if (job.status === "SUCCESS") {
+  if (job.status === "SUCCESS" || job.status === "FAILED") {
     sseService.removeInstance(jobId);
   }
 };
