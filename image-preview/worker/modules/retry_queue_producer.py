@@ -1,6 +1,6 @@
 import pika
 from pika.adapters.blocking_connection import BlockingChannel
-from getenv import getenv
+from modules.getenv import getenv
 
 MAIN_EXCHANGE_NAME = getenv("EXCHANGE_NAME")
 QUEUE_NAME = getenv("QUEUE_NAME")

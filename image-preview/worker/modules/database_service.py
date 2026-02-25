@@ -1,4 +1,4 @@
-from getenv import getenv
+from modules.getenv import getenv
 import psycopg2
 
 class DatabaseService:

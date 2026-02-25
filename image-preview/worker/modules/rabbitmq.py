@@ -1,8 +1,8 @@
-from getenv import getenv
+from modules.getenv import getenv
 import time
 import pika
 from pika.adapters.blocking_connection import BlockingChannel
-import retry_queue_producer
+from modules import retry_queue_producer
 
 
 RABBITMQ_HOST = getenv("RABBITMQ_HOST")

@@ -5,8 +5,8 @@ from typing import TypedDict
 from pika import spec
 from pika.adapters.blocking_connection import BlockingChannel
 
-from getenv import getenv
-from retry_queue_producer import publish_retry
+from modules.getenv import getenv
+from modules.retry_queue_producer import publish_retry
 
 MAX_RETRIES = int(getenv("MAX_RETRIES"))
 
