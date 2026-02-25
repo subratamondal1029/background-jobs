@@ -4,6 +4,7 @@ import ApiResponse from "@/utils/ApiResponse";
 import prisma from "@/lib/prisma";
 import type { Request, Response } from "express";
 import uploadService from "@/services/upload.service";
+import { addJob } from "./job.controller";
 
 const getImageEntry = async (id: string) => {
   const image = await prisma.image.findUnique({
@@ -30,10 +31,13 @@ const upload = asyncHandler(async (req: Request, res: Response) => {
     },
   });
 
+  const jobId = await addJob(image.id);
+  // create sse
+
   res
     .status(201)
     .json(
-      new ApiResponse({ id: image.id }, 201, "Image uploaded successfully"),
+      new ApiResponse({ id: image.id, jobId }, 201, "Image uploaded successfully"),
     );
 });
 
