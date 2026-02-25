@@ -3,6 +3,9 @@ FROM node:20-slim
 
 WORKDIR /app
 
+# install curl
+RUN apt-get update && apt-get install -y curl
+
 # pnpm support (critical)
 RUN corepack enable
 
