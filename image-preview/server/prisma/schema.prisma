@@ -12,6 +12,7 @@ enum JobStatus {
   PENDING
   PROCESSING
   SUCCESS
+  RETRYING
   FAILED
 }
 
@@ -33,6 +34,7 @@ model Job {
   resourceId  String
   status      JobStatus @default(PENDING)
   completedAt DateTime?
+  retries     Int       @default(0)
   error       String?
 
   resource Image @relation(fields: [resourceId], references: [id], onDelete: NoAction)

@@ -8,6 +8,7 @@ class JobDetails(TypedDict):
     resourceId: str
     completedAt: str | None
     error: str | None
+    retries: int
     createdAt: str
     updatedAt: str
 
@@ -47,11 +48,11 @@ class DatabaseService:
         self._cur.execute("UPDATE images SET previewKey = %s WHERE id = %s", (preview_key, image_id))
         self._conn.commit()
     
-    def update_job_status(self, job_id: int, status: str, error: str | None = None):
+    def update_job_status(self, job_id: int, status: str, error: str | None = None, retries: int = 0):
         if error:
-            self._cur.execute("UPDATE jobs SET status = %s, error = %s, updatedAt = NOW() WHERE id = %s", (status, error, job_id))
+            self._cur.execute("UPDATE jobs SET status = %s, error = %s, retries = %s, updatedAt = NOW() WHERE id = %s", (status, error, retries, job_id))
         else:
-            self._cur.execute("UPDATE jobs SET status = %s, updatedAt = NOW() WHERE id = %s", (status, job_id))
+            self._cur.execute("UPDATE jobs SET status = %s, retries = %s, updatedAt = NOW() WHERE id = %s", (status, retries, job_id))
         self._conn.commit()
 
     def get_job_details(self, job_id: int) -> JobDetails:
