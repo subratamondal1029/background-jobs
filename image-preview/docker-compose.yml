@@ -116,4 +116,5 @@ services:
     # Dev config
     volumes:
       - ./worker:/app
-    command: sh -c "uv sync && watchfiles 'uv run main.py' ."
+    command: uv run python -u main.py
+    # command: sh -c "uv sync && exec uv run --no-sync python -u main.py"
