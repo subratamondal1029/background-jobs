@@ -86,7 +86,7 @@ services:
     volumes:
       - ./server:/app
       - /app/node_modules
-    command: sh -c "pnpm install && pnpm dev"
+    command: sh -c "pnpm install && pnpm run db:deploy && pnpm dev"
 
 # Python Worker process
   worker:
