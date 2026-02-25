@@ -1,9 +1,12 @@
 import amqplib from "amqplib";
 import requiredEnv from "@/utils/requiredEnv.js";
+import { sendStatusUpdate } from "@/controllers/job.controller.js";
 
 const RABBITMQ_URL = requiredEnv("RABBITMQ_CONN");
 const EXCHANGE_NAME = requiredEnv("EXCHANGE_NAME");
 const IMAGE_PROCESS_QUEUE = requiredEnv("IMAGE_PROCESS_QUEUE");
+const STATUS_QUEUE = requiredEnv("STATUS_QUEUE");
+const STATUS_EXCHANGE = requiredEnv("STATUS_EXCHANGE");
 
 let channel: amqplib.ConfirmChannel;
 
@@ -36,7 +39,17 @@ const publishToQueue = (
     console.warn("Backpressure: TCP buffer full");
   }
 
-  return async () => await channel.waitForConfirms()
+  return async () => await channel.waitForConfirms();
+};
+
+const consumeStatus = async (msg: amqplib.ConsumeMessage | null) => {
+  if (!msg) {
+    console.warn("Received null message");
+    return;
+  }
+
+  const { jobId, status } = JSON.parse(msg.content.toString());
+  sendStatusUpdate(jobId, status);
 };
 
 const connectMQ = async () => {
@@ -53,6 +66,10 @@ const connectMQ = async () => {
       EXCHANGE_NAME,
       IMAGE_PROCESS_QUEUE,
     );
+
+    await createQueue(STATUS_QUEUE);
+    await channel.bindQueue(STATUS_QUEUE, STATUS_EXCHANGE, STATUS_QUEUE);
+    await channel.consume(STATUS_QUEUE, consumeStatus);
   } catch (error) {
     console.error("Error connecting to RabbitMQ:", error);
     throw error;
