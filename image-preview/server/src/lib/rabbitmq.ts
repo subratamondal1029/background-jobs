@@ -18,7 +18,10 @@ const createQueue = async (queueName: string) => {
   }
 };
 
-const publishToQueue = (queueName: string, message: Record<string, any>) => {
+const publishToQueue = (
+  message: Record<string, any>,
+  queueName: string = IMAGE_PROCESS_QUEUE,
+) => {
   if (!channel) {
     throw new Error("RabbitMQ channel is not initialized");
   }
@@ -30,8 +33,10 @@ const publishToQueue = (queueName: string, message: Record<string, any>) => {
   );
 
   if (!ok) {
-    console.warn("Backpressure: TCP buffer full")
+    console.warn("Backpressure: TCP buffer full");
   }
+
+  return async () => await channel.waitForConfirms()
 };
 
 const connectMQ = async () => {
@@ -43,7 +48,11 @@ const connectMQ = async () => {
     });
 
     await createQueue(IMAGE_PROCESS_QUEUE);
-    await channel.bindQueue(IMAGE_PROCESS_QUEUE, EXCHANGE_NAME, IMAGE_PROCESS_QUEUE);
+    await channel.bindQueue(
+      IMAGE_PROCESS_QUEUE,
+      EXCHANGE_NAME,
+      IMAGE_PROCESS_QUEUE,
+    );
   } catch (error) {
     console.error("Error connecting to RabbitMQ:", error);
     throw error;
