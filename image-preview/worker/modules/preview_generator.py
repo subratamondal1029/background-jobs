@@ -1,3 +1,4 @@
+import time
 import json
 from decimal import Decimal
 from typing import TypedDict
@@ -14,7 +15,7 @@ MAX_RETRIES = int(getenv("MAX_RETRIES"))
 class Data(TypedDict):
     size: int
     imageId: str
-    jobId: str
+    jobId: int
 
 
 def generate_preview(
@@ -26,8 +27,8 @@ def generate_preview(
     try:
         headers = properties.headers or {}        
         data: Data = json.loads(body)
+        time.sleep(5)
         print(data)
-
         channel.basic_ack(delivery_tag=method.delivery_tag)
     except Exception as e:
         raw_retry_count = headers.get("x-retry-count", 0)
