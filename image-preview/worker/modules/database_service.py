@@ -2,17 +2,6 @@ from modules.getenv import getenv
 import psycopg2
 from typing import TypedDict
 
-#   id          Int       @id @default(autoincrement())
-#   resourceId  String
-#   status      JobStatus @default(PENDING)
-#   completedAt DateTime?
-#   error       String?
-
-#   resource Image @relation(fields: [resourceId], references: [id], onDelete: NoAction)
-
-#   createdAt DateTime @default(now())
-#   updatedAt DateTime @updatedAt
-
 class JobDetails(TypedDict):
     id: int
     status: str
@@ -58,8 +47,11 @@ class DatabaseService:
         self._cur.execute("UPDATE images SET previewKey = %s WHERE id = %s", (preview_key, image_id))
         self._conn.commit()
     
-    def update_job_status(self, job_id: int, status: str):
-        self._cur.execute("UPDATE jobs SET status = %s, updatedAt = NOW() WHERE id = %s", (status, job_id))
+    def update_job_status(self, job_id: int, status: str, error: str | None = None):
+        if error:
+            self._cur.execute("UPDATE jobs SET status = %s, error = %s, updatedAt = NOW() WHERE id = %s", (status, error, job_id))
+        else:
+            self._cur.execute("UPDATE jobs SET status = %s, updatedAt = NOW() WHERE id = %s", (status, job_id))
         self._conn.commit()
 
     def get_job_details(self, job_id: int) -> JobDetails:
