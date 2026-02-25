@@ -4,7 +4,9 @@ import express, {
   type NextFunction,
 } from "express";
 import prisma from "@/lib/prisma.js";
-import { publishToQueue } from "@/lib/rabbitmq.js";
+import ApiError from "@/utils/ApiError.js";
+import asyncHandler from "@/utils/asyncHandler.js";
+import ApiResponse from "./utils/ApiResponse";
 
 const app = express();
 
@@ -13,38 +15,32 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 // Health Check Route
-app.get("/health", async (req: Request, res: Response) => {
-  try {
-    const result = await prisma.$queryRaw`SELECT 1`;
-    console.log(result); // NOTE: ONLY FOR LEARNING
+app.get(
+  "/health",
+  asyncHandler(async (req: Request, res: Response) => {
+    try {
+      await prisma.$queryRaw`SELECT 1`;
 
-    res.status(200).json({ status: "OK", message: "Server is running" });
-  } catch (error) {
-    res.status(503).json({ status: "ERROR", message: "Database unavailable" });
-  }
-});
+      res.json(new ApiResponse({ status: "OK", message: "Server is running" }));
+    } catch (error) {
+      throw new ApiError(503, "Database unavailable");
+    }
+  }),
+);
 
-// testing
-app.get("/test", async (req: Request, res: Response) => {
-  const confirm = publishToQueue({ test: "message", jobId: 1 });
-  await confirm();
-
-  res.json({
-    success: true,
-    message: "Message published to queue successfully",
-    jobId: 1,
-  });
-});
+// routes
 
 // Catch all route
-app.use((req: Request, res: Response, next: NextFunction) => {
-  res.status(404).json({ error: "Route not found" });
-});
+app.use(
+  asyncHandler(async (req: Request, res: Response, __: NextFunction) => {
+    const route = req.path;
+    throw new ApiError(404, `Route not found: ${route}`);
+  }),
+);
 
 // Error Handling Middleware
-app.use((err: any, req: Request, res: Response, next: NextFunction) => {
-  console.error(err.stack);
-  res.status(500).json({ error: "Internal server error" });
+app.use((err: ApiError, _: Request, res: Response, __: NextFunction) => {
+  res.status(err.statusCode).json(ApiError);
 });
 
 export default app;
