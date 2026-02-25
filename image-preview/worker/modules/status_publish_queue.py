@@ -6,7 +6,6 @@ from typing import TypedDict
 class StatusMessage(TypedDict):
     jobId: int
     status: str
-    previewUrl: str | None
     error: str | None
 
 STATUS_EXCHANGE = getenv("STATUS_EXCHANGE")
