@@ -4,6 +4,7 @@ import express, {
   type NextFunction,
 } from "express";
 import prisma from "@/lib/prisma.js";
+import { publishToQueue } from "@/lib/rabbitmq.js";
 
 const app = express();
 
@@ -21,6 +22,18 @@ app.get("/health", async (req: Request, res: Response) => {
   } catch (error) {
     res.status(503).json({ status: "ERROR", message: "Database unavailable" });
   }
+});
+
+// testing
+app.get("/test", async (req: Request, res: Response) => {
+  const confirm = publishToQueue({ test: "message", jobId: 1 });
+  await confirm();
+
+  res.json({
+    success: true,
+    message: "Message published to queue successfully",
+    jobId: 1,
+  });
 });
 
 // Catch all route
