@@ -49,7 +49,7 @@ model Image {
   filename    String  @default("image.jpg")
   contentType String
   originalKey String  @unique
-  previewKey  String  @unique
+  previewKey  String?  @unique
 
   jobs  Job[]
   owner User? @relation(fields: [ownerId], references: [id], onDelete: Cascade)
