@@ -24,7 +24,11 @@ class UploadService {
     return `uploads/originals/${randomBytes(16).toString("hex")}-${filename}`;
   }
 
-  async uploadFile(req: Request): Promise<string> {
+  async uploadFile(req: Request): Promise<{
+    key: string,
+    filename: string,
+    contentType: string
+  }> {
     const contentType = req.headers?.["content-type"];
     const fileSize = Number(req.headers?.["content-length"] || 0);
 
@@ -69,7 +73,11 @@ class UploadService {
         }),
       );
 
-      return fileKey;
+      return {
+        key: fileKey,
+        filename: fileKey.split("-").pop() || "image.jpg",
+        contentType,
+      };
     } catch (error) {
       // delete async if exist
       this.deleteFile(fileKey);
