@@ -1,4 +1,5 @@
 import time
+import random
 import json
 from decimal import Decimal
 from typing import TypedDict
@@ -25,10 +26,11 @@ def generate_preview(
     body: bytes,
 ):
     try:
-        headers = properties.headers or {}        
+        headers = properties.headers or {}
         data: Data = json.loads(body)
         time.sleep(5)
         print(data)
+
         channel.basic_ack(delivery_tag=method.delivery_tag)
     except Exception as e:
         raw_retry_count = headers.get("x-retry-count", 0)
@@ -43,5 +45,6 @@ def generate_preview(
             print(f"Max retries exceeded for job {data['jobId']}")
             channel.basic_reject(delivery_tag=method.delivery_tag, requeue=False)
             return
-        
+
         publish_retry(channel, body, retry_count + 1)
+        channel.basic_ack(delivery_tag=method.delivery_tag)
