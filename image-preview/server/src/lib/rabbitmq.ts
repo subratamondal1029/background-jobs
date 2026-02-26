@@ -59,6 +59,9 @@ const connectMQ = async () => {
     await channel.assertExchange(EXCHANGE_NAME, "direct", {
       durable: true,
     });
+    await channel.assertExchange(STATUS_EXCHANGE, "direct", {
+      durable: true,
+    });
 
     await createQueue(IMAGE_PROCESS_QUEUE);
     await channel.bindQueue(
@@ -67,6 +70,7 @@ const connectMQ = async () => {
       IMAGE_PROCESS_QUEUE,
     );
 
+    
     await createQueue(STATUS_QUEUE);
     await channel.bindQueue(STATUS_QUEUE, STATUS_EXCHANGE, STATUS_QUEUE);
     await channel.consume(STATUS_QUEUE, consumeStatus);
