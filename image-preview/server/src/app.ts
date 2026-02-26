@@ -44,7 +44,7 @@ app.use(
 
 // Error Handling Middleware
 app.use((err: ApiError, _: Request, res: Response, __: NextFunction) => {
-  res.status(err.statusCode).json(ApiError);
+  res.status(err.statusCode).json(err);
 });
 
 export default app;
