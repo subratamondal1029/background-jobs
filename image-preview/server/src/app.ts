@@ -7,6 +7,8 @@ import prisma from "@/lib/prisma.js";
 import ApiError from "@/utils/ApiError.js";
 import asyncHandler from "@/utils/asyncHandler.js";
 import ApiResponse from "./utils/ApiResponse";
+import imageRouter from "@/routes/image.routes.js"
+import jobRouter from "@/routes/job.routes.js"
 
 const app = express();
 
@@ -29,6 +31,8 @@ app.get(
 );
 
 // routes
+app.use("/api/v1/images", imageRouter);
+app.use("/api/v1/jobs", jobRouter);
 
 // Catch all route
 app.use(
