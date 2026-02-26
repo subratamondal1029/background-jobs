@@ -3,6 +3,7 @@ import prisma from "@/lib/prisma";
 import asyncHandler from "@/utils/asyncHandler";
 
 import { publishToQueue } from "@/lib/rabbitmq";
+import type { Job } from "../../generated/prisma/client";
 import type { Request, Response } from "express";
 import type { JobIdSchema } from "@/schema/jobSchema/id.schema.js";
 import ApiResponse from "@/utils/ApiResponse";
@@ -42,18 +43,18 @@ const sendStatusUpdate = async (jobId: number, status: string) => {
   }
 
   const response: {
-    jobId: number,
-    status: string,
-    previewUrl?: string
-    error?: string
+    jobId: number;
+    status: string;
+    previewUrl?: string;
+    error?: string;
   } = {
     jobId,
     status: job.status,
   };
 
-  if(job.status === "SUCCESS") {
-    response.previewUrl = `/api/v1/images/preview/${job.resourceId}`
-  }else if(job.status === "FAILED") {
+  if (job.status === "SUCCESS") {
+    response.previewUrl = `/api/v1/images/preview/${job.resourceId}`;
+  } else if (job.status === "FAILED") {
     response.error = "Something Went Wrong";
   }
 
@@ -89,11 +90,20 @@ const getJobStatus = asyncHandler(async (req: Request, res: Response) => {
 });
 
 // sse job status
-const startSseJobStatusEvent = asyncHandler(
-  async (req: Request, res: Response) => {
+const startSseJobStatusEvent = async (req: Request, res: Response) => {
+  let job: Pick<
+    Job,
+    "id" | "status" | "completedAt" | "createdAt" | "updatedAt"
+  > | null = null;
+  
+  res.setHeader("Content-Type", "text/event-stream");
+  res.setHeader("Cache-Control", "no-cache");
+  res.setHeader("Connection", "keep-alive");
+
+  try {
     const { id } = req.params as unknown as JobIdSchema;
 
-    const job = await prisma.job.findUnique({
+    job = await prisma.job.findUnique({
       where: {
         id,
       },
@@ -107,26 +117,37 @@ const startSseJobStatusEvent = asyncHandler(
     });
 
     if (!job) {
-      throw new ApiError(404, "Job not found");
-    }
-
-    res.setHeader("Content-Type", "text/event-stream");
-    res.setHeader("Cache-Control", "no-cache");
-    res.setHeader("Connection", "keep-alive");
-
-    res.write(`data: ${JSON.stringify(job)}\n\n`);
-
-    if (job?.status === "SUCCESS") {
+      res.write(
+        `data: ${JSON.stringify(new ApiError(404, "Job not found"))}\n\n`,
+      );
       res.end();
       return;
     }
 
-    sseService.addInstance(job.id, res);
+    res.write(
+      `data: ${JSON.stringify(new ApiResponse(job, 200, "Job status retrieved successfully"))}\n\n`,
+    );
+
+    if (job?.status === "SUCCESS" || job?.status === "FAILED") {
+      res.end();
+      return;
+    }
+
+    const jobId = job.id;
+    sseService.addInstance(jobId, res);
     req.on("close", () => {
-      sseService.removeInstance(job.id);
+      sseService.removeInstance(jobId);
     });
-  },
-);
+  } catch (error) {
+    res.write(
+      `data: ${JSON.stringify(new ApiError(500, "Internal server error"))}\n\n`,
+    );
+    res.end();
+    if (job) {
+      sseService.removeInstance(job.id);
+    }
+  }
+};
 
 // for admin/developer
 const getJob = asyncHandler(async (req: Request, res: Response) => {
@@ -145,4 +166,10 @@ const getJob = asyncHandler(async (req: Request, res: Response) => {
   res.json(new ApiResponse(job, 200, "Job retrieved successfully"));
 });
 
-export { addJob, getJobStatus, startSseJobStatusEvent, sendStatusUpdate, getJob };
+export {
+  addJob,
+  getJobStatus,
+  startSseJobStatusEvent,
+  sendStatusUpdate,
+  getJob,
+};
