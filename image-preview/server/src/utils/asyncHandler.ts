@@ -140,6 +140,8 @@ const asyncHandler =
   (fn: AsyncFunction) => (req: Request, res: Response, next: NextFunction) =>
     Promise.resolve(fn(req, res, next)).catch((err) => {
       const errorResponse = normalizeErrorResponse(err);
+      // debug 
+      console.error(errorResponse)
       next(errorResponse);
     });
 
