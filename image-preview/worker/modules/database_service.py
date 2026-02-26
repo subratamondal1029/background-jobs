@@ -14,10 +14,10 @@ class JobDetails(TypedDict):
 
 
 class DatabaseService:
-    _host = (getenv("DB_HOST"),)
-    _port = (getenv("DB_PORT"),)
-    _user = (getenv("DB_USER"),)
-    _password = (getenv("DB_PASSWORD"),)
+    _host = getenv("DB_HOST")
+    _port = int(getenv("DB_PORT"))
+    _user = getenv("DB_USER")
+    _password = getenv("DB_PASSWORD")
     _dbname = getenv("DB_DB")
     
     def __init__(self) -> None:
