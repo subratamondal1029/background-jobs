@@ -36,6 +36,7 @@ class DatabaseService:
         self._conn.close()
 
     def get_image_key(self, image_id: str) -> str:
+        # TODO: get image that does not have previewKey
         query = """
             SELECT "originalKey", filename 
             FROM images 
@@ -52,7 +53,7 @@ class DatabaseService:
     def update_image_preview(self, image_id: str, preview_key: str):
         query = """
             UPDATE images 
-            SET "previewKey" = %s 
+            SET "previewKey" = %s, "updatedAt" = NOW() 
             WHERE id = %s
         """
         self._cur.execute(query, (preview_key, image_id))
@@ -69,7 +70,7 @@ class DatabaseService:
         else:
             query = """
                 UPDATE jobs 
-                SET status = %s, retries = %s, "updatedAt" = NOW() 
+                SET status = %s, retries = %s, "updatedAt" = NOW(), "completedAt" = NOW()
                 WHERE id = %s
             """
             self._cur.execute(query, (status, retries, job_id))
