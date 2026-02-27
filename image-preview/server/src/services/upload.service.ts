@@ -68,7 +68,7 @@ class UploadService {
         new PutObjectCommand({
           Bucket: this.bucketName,
           Key: fileKey,
-          Body: req,
+          Body: req.body,
           ContentType: contentType,
         }),
       );
