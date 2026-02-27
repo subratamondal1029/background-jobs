@@ -33,6 +33,17 @@ def create_image(image_id: str, size: str):
     original_image_data = storage_service.read_image(original_image_key)
 
     img = Image.open(BytesIO(original_image_data))
+
+    if img.mode in ("RGBA", "LA") or (
+        img.mode == "P" and "transparency" in img.info
+    ):
+        rgb_img = Image.new("RGB", img.size, (255, 255, 255))
+        alpha = img.convert("RGBA")
+        rgb_img.paste(alpha, mask=alpha.split()[-1])
+        img = rgb_img
+    elif img.mode != "RGB":
+        img = img.convert("RGB")
+
     img.thumbnail((int(formatted_size[0]), int(formatted_size[1])))
 
     buff = BytesIO()
