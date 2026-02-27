@@ -9,10 +9,8 @@ import { jobIdSchema } from "@/schema/jobSchema/id.schema";
 
 const router = Router();
 
-router.use(zodParser(jobIdSchema, TargetEnum.params));
-
-router.get("/:id", getJob);
-router.get("/status/:id", getJobStatus);
-router.get("/status/event/:id", startSseJobStatusEvent);
+router.get("/status/event/:id", zodParser(jobIdSchema, TargetEnum.params), startSseJobStatusEvent);
+router.get("/status/:id", zodParser(jobIdSchema, TargetEnum.params), getJobStatus);
+router.get("/:id", zodParser(jobIdSchema, TargetEnum.params), getJob);
 
 export default router;
