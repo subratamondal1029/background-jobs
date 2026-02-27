@@ -37,7 +37,11 @@ const upload = asyncHandler(async (req: Request, res: Response) => {
   res
     .status(201)
     .json(
-      new ApiResponse({ id: image.id, jobId }, 201, "Image uploaded successfully"),
+      new ApiResponse(
+        { id: image.id, jobId },
+        201,
+        "Image uploaded successfully",
+      ),
     );
 });
 
@@ -74,7 +78,7 @@ const deleteImage = asyncHandler(async (req: Request, res: Response) => {
       id,
     },
   });
-  
+
   uploadService.deleteFile(image.originalKey);
   if (image.previewKey) {
     uploadService.deleteFile(image.previewKey);

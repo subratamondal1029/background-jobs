@@ -53,7 +53,9 @@ const sendStatusUpdate = async (jobId: number, status: string) => {
   };
 
   if (job.status === "SUCCESS") {
-    response.previewUrl = `/api/v1/images/preview/${job.resourceId}`;
+    if (job.resourceId) {
+      response.previewUrl = `/api/v1/images/preview/${job.resourceId}`;
+    }
   } else if (job.status === "FAILED") {
     response.error = "Something Went Wrong";
   }
