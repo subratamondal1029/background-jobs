@@ -25,6 +25,7 @@ def init(ch: BlockingChannel):
 
 def publish_status(ch: BlockingChannel, message: StatusMessage):
     json_message = json.dumps(message)
+    print("Sending status message:", json_message)
     ch.basic_publish(
         exchange=STATUS_EXCHANGE,
         routing_key=STATUS_QUEUE,
