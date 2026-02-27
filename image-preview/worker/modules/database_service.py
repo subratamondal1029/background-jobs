@@ -36,7 +36,12 @@ class DatabaseService:
         self._conn.close()
 
     def get_image_key(self, image_id: str) -> str:
-        self._cur.execute("SELECT originalKey, filename FROM images WHERE id = %s", (image_id,))
+        query = """
+            SELECT "originalKey", filename 
+            FROM images 
+            WHERE id = %s
+        """
+        self._cur.execute(query, (image_id,))
         row = self._cur.fetchone()
 
         if not row:
@@ -45,14 +50,29 @@ class DatabaseService:
         return row[0]
     
     def update_image_preview(self, image_id: str, preview_key: str):
-        self._cur.execute("UPDATE images SET previewKey = %s WHERE id = %s", (preview_key, image_id))
+        query = """
+            UPDATE images 
+            SET "previewKey" = %s 
+            WHERE id = %s
+        """
+        self._cur.execute(query, (preview_key, image_id))
         self._conn.commit()
     
     def update_job_status(self, job_id: int, status: str, error: str | None = None, retries: int = 0):
         if error:
-            self._cur.execute("UPDATE jobs SET status = %s, error = %s, retries = %s, updatedAt = NOW() WHERE id = %s", (status, error, retries, job_id))
+            query = """
+                UPDATE jobs 
+                SET status = %s, error = %s, retries = %s, "updatedAt" = NOW() 
+                WHERE id = %s
+            """
+            self._cur.execute(query, (status, error, retries, job_id))
         else:
-            self._cur.execute("UPDATE jobs SET status = %s, retries = %s, updatedAt = NOW() WHERE id = %s", (status, retries, job_id))
+            query = """
+                UPDATE jobs 
+                SET status = %s, retries = %s, "updatedAt" = NOW() 
+                WHERE id = %s
+            """
+            self._cur.execute(query, (status, retries, job_id))
         self._conn.commit()
 
     def get_job_details(self, job_id: int) -> JobDetails:
