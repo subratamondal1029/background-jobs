@@ -70,10 +70,18 @@ class DatabaseService:
         else:
             query = """
                 UPDATE jobs 
-                SET status = %s, retries = %s, "updatedAt" = NOW(), "completedAt" = NOW()
+                SET status = %s, retries = %s, "updatedAt" = NOW()
                 WHERE id = %s
             """
             self._cur.execute(query, (status, retries, job_id))
+        
+        if status == "SUCCESS":
+            query = """
+                UPDATE jobs 
+                SET "completedAt" = NOW()
+                WHERE id = %s
+            """
+            self._cur.execute(query, (job_id,))
         self._conn.commit()
 
     def get_job_details(self, job_id: int) -> JobDetails:
