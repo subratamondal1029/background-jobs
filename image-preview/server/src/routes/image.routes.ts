@@ -1,4 +1,4 @@
-import { Router } from "express";
+import { Router, raw } from "express";
 import {
   upload,
   getImage,
@@ -7,10 +7,14 @@ import {
 } from "@/controllers/image.controller.js";
 import zodParser, { TargetEnum } from "@/middlewares/zodParser.middleware";
 import { imageIdSchema } from "@/schema/imageSchema/id.schema";
+import { ALLOW_MINE_TYPES, MAX_FILE_SIZE } from "@/constant";
 
 const router = Router();
 
-router.post("/upload", upload);
+router.post("/upload", raw({
+  limit: MAX_FILE_SIZE,
+  type: ALLOW_MINE_TYPES
+}), upload);
 router.get(
   "/preview/:id",
   zodParser(imageIdSchema, TargetEnum.params),
