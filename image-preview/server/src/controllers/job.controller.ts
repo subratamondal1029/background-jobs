@@ -5,7 +5,7 @@ import asyncHandler from "@/utils/asyncHandler";
 import { publishToQueue } from "@/lib/rabbitmq";
 import type { Job } from "../../generated/prisma/client";
 import type { Request, Response } from "express";
-import type { JobIdSchema } from "@/schema/jobSchema/id.schema.js";
+import { jobIdSchema, type JobIdSchema } from "@/schema/jobSchema/id.schema.js";
 import ApiResponse from "@/utils/ApiResponse";
 import sseService from "@/services/sse.service";
 
@@ -35,20 +35,19 @@ const sendStatusUpdate = async (jobId: number, status: string) => {
   });
 
   if (!job) {
-    sseService.sendData(jobId, {
-      statusCode: 404,
-      error: "Job not found",
-    });
+    sseService.sendData(jobId, new ApiError(404, "Job not found"));
     return;
   }
 
   const response: {
     jobId: number;
     status: string;
+    completedAt?: Date | null;
     previewUrl?: string;
     error?: string;
   } = {
     jobId,
+    completedAt: job.completedAt,
     status: job.status,
   };
 
@@ -60,7 +59,11 @@ const sendStatusUpdate = async (jobId: number, status: string) => {
     response.error = "Something Went Wrong";
   }
 
-  sseService.sendData(jobId, response);
+  sseService.sendData(
+    jobId,
+    new ApiResponse(response, 206, "Job status updated"),
+  );
+  console.log("Status SSE Response:", response);
 
   if (job.status === "SUCCESS" || job.status === "FAILED") {
     sseService.removeInstance(jobId);
@@ -97,13 +100,13 @@ const startSseJobStatusEvent = async (req: Request, res: Response) => {
     Job,
     "id" | "status" | "completedAt" | "createdAt" | "updatedAt"
   > | null = null;
-  
+
   res.setHeader("Content-Type", "text/event-stream");
   res.setHeader("Cache-Control", "no-cache");
   res.setHeader("Connection", "keep-alive");
 
   try {
-    const { id } = req.params as unknown as JobIdSchema;
+    const { id } = jobIdSchema.parse(req.params);
 
     job = await prisma.job.findUnique({
       where: {
@@ -141,6 +144,7 @@ const startSseJobStatusEvent = async (req: Request, res: Response) => {
       sseService.removeInstance(jobId);
     });
   } catch (error) {
+    console.error("Error in startSseJobStatusEvent:", error);
     res.write(
       `data: ${JSON.stringify(new ApiError(500, "Internal server error"))}\n\n`,
     );
