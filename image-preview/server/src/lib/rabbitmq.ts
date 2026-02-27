@@ -47,7 +47,9 @@ const consumeStatus = async (msg: amqplib.ConsumeMessage | null) => {
     console.warn("Received null message");
     return;
   }
+  console.log("status received: ", msg.content.toString());
 
+  channel.ack(msg);
   const { jobId, status } = JSON.parse(msg.content.toString());
   sendStatusUpdate(jobId, status);
 };
@@ -70,7 +72,6 @@ const connectMQ = async () => {
       IMAGE_PROCESS_QUEUE,
     );
 
-    
     await createQueue(STATUS_QUEUE);
     await channel.bindQueue(STATUS_QUEUE, STATUS_EXCHANGE, STATUS_QUEUE);
     await channel.consume(STATUS_QUEUE, consumeStatus);
