@@ -1,4 +1,5 @@
 import pika
+import json
 from pika.adapters.blocking_connection import BlockingChannel
 from modules.getenv import getenv
 from typing import TypedDict
@@ -23,9 +24,10 @@ def init(ch: BlockingChannel):
     ch.queue_bind(queue=STATUS_QUEUE, exchange=STATUS_EXCHANGE, routing_key=STATUS_QUEUE)
 
 def publish_status(ch: BlockingChannel, message: StatusMessage):
+    json_message = json.dumps(message)
     ch.basic_publish(
         exchange=STATUS_EXCHANGE,
         routing_key=STATUS_QUEUE,
-        body=str(message),
+        body=json_message,
         properties=pika.BasicProperties(delivery_mode=2)
     )
