@@ -1,0 +1,125 @@
+# Secrets & sensitive files
+.env
+.env.*
+*.env
+*.key
+*.pem
+*_rsa
+*_rsa.*
+*.p12
+*.pfx
+.aws/
+.ssh/
+credentials
+secrets.yml
+secrets.yaml
+
+# Node.js
+node_modules/
+.npm/
+.yarn/
+.pnp.*
+dist/
+build/
+.next/
+.nuxt/
+.cache/
+.turbo/
+out/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.py[cod]
+*$py.class
+*.so
+.Python
+.venv/
+venv/
+env/
+ENV/
+env.bak/
+venv.bak/
+pip-log.txt
+pip-delete-this-directory.txt
+.mypy_cache/
+.dmypy.json
+*.egg-info/
+
+# Volumes / databases
+volumes/
+
+# Version control
+.git/
+.gitignore
+.gitattributes
+.gitmodules
+.svn/
+.hg/
+
+# IDE & editor
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.project
+.classpath
+.settings/
+
+# Documentation
+*.md
+README*
+LICENSE*
+CHANGELOG*
+docs/
+documentation/
+.readthedocs.yml
+mkdocs.yml
+
+# Tests & coverage
+test/
+tests/
+__tests__/
+*.test.js
+*.test.ts
+*.spec.js
+*.spec.ts
+*.test.py
+*_test.go
+coverage/
+.coverage
+htmlcov/
+.pytest_cache/
+.tox/
+jest.config.js
+vitest.config.js
+
+# CI/CD
+.github/
+.gitlab-ci.yml
+.circleci/
+.travis.yml
+azure-pipelines.yml
+Jenkinsfile
+.drone.yml
+
+# Logs
+*.log
+logs/
+
+# OS-specific
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+desktop.ini

@@ -1,0 +1,64 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ENUMS
+enum JobStatus {
+  PENDING
+  PROCESSING
+  SUCCESS
+  RETRYING
+  FAILED
+}
+
+model User {
+  id    String  @id @default(uuid())
+  name  String?
+  email String  @unique
+
+  images Image[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("users")
+}
+
+model Job {
+  id          Int       @id @default(autoincrement())
+  resourceId  String?
+  status      JobStatus @default(PENDING)
+  completedAt DateTime?
+  retries     Int       @default(0)
+  error       String?
+
+  resource Image? @relation(fields: [resourceId], references: [id], onDelete: SetNull)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("jobs")
+}
+
+model Image {
+  id          String  @id @default(uuid())
+  ownerId     String?
+  filename    String  @default("image.jpg")
+  contentType String
+  originalKey String  @unique
+  previewKey  String?  @unique
+
+  jobs  Job[]
+  owner User? @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([ownerId])
+  @@map("images")
+}
