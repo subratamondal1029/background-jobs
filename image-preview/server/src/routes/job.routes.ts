@@ -9,7 +9,7 @@ import { jobIdSchema } from "@/schema/jobSchema/id.schema";
 
 const router = Router();
 
-router.get("/status/event/:id", zodParser(jobIdSchema, TargetEnum.params), startSseJobStatusEvent);
+router.get("/status/event/:id", startSseJobStatusEvent); // zod parse in controller for normalize error message
 router.get("/status/:id", zodParser(jobIdSchema, TargetEnum.params), getJobStatus);
 router.get("/:id", zodParser(jobIdSchema, TargetEnum.params), getJob);
 
